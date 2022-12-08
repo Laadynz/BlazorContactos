@@ -1,0 +1,70 @@
+﻿@page "/medioContacto"
+@page "/medioContacto/{id:int}"
+
+@using BlazorContactos.Shared.DTOS.MediosContactos
+@using BlazorContactos.Shared.DTOS.Contactos
+
+@inject HttpClient httpClient
+@inject NavigationManager navigationManager
+
+
+<h3>MedioContacto</h3>
+
+<EditForm Model="medioContacto" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="col-lg-12">
+        <div class="mb-3">
+            <label class="form-label">Clave</label>
+            <InputText id="Clave" class="form-control" @bind-Value="@medioContacto.TipoContacto" />
+            <ValidationMessage For="@(() => medioContacto.TipoContacto)" />
+        </div>
+    </div>
+
+     <div class="col-lg-12">
+        <div class="mb-3">
+           <label class="form-label">Nombre</label>
+            <InputText id="Nombre" class="form-control" @bind-Value="@medioContacto.Contacto" />
+            <ValidationMessage For="@(() => medioContacto.Contacto)" />
+        </div>
+    </div>
+
+    <div class="col-1g-12 text-end mb-3 pt-4">
+        <hr />
+        <button type="button" class="btn btn-danger" onclick="history.back()">Cancelar</button>
+        <button type="submit" class="btn btn-success">Guardar</button>
+    </div>
+
+</EditForm>
+
+@code {
+    
+     protected MediosContactoDTO medioContacto = new MediosContactoDTO();
+    [Parameter] public int id { get; set; } = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (id > 0)
+        {
+            var response = await httpClient.GetFromJsonAsync<MediosContactoDTO>($"api/MediosContactos/{id}");
+            if (response != null)
+            {
+                medioContacto = response;
+            }
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (id > 0)
+        {
+            await httpClient.PutAsJsonAsync<MediosContactoDTO>("api/MediosContactos", medioContacto);
+        }
+        else
+        {
+            await httpClient.PostAsJsonAsync<MediosContactoDTO>("api/MediosContactos", medioContacto);
+        }
+
+        navigationManager.NavigateTo("materias");
+    }
+}
